@@ -1,8 +1,8 @@
 # hp_4.py
-#
 from datetime import datetime, timedelta
 from csv import DictReader, DictWriter
 from collections import defaultdict
+import csv  # Add this import statement
 
 def reformat_dates(old_dates):
     """Accepts a list of date strings in format yyyy-mm-dd, re-formats each
@@ -21,13 +21,12 @@ def date_range(start, n):
     start_date = datetime.strptime(start, '%Y-%m-%d')
     return [start_date + timedelta(days=i) for i in range(n)]
 
-
 def add_date_range(values, start_date):
     """Adds a daily date range to the list `values` beginning with
     `start_date`.  The date, value pairs are returned as tuples
     in the returned list."""
+    date_objects = date_range(start_date, len(values))
     return list(zip(date_objects, values))
-
 
 def fees_report(infile, outfile):
     """Calculates late fees per patron id and writes a summary report to
@@ -58,7 +57,6 @@ def fees_report(infile, outfile):
         for patron_id, late_fee in late_fees_dict.items():
             writer.writerow({'patron_id': patron_id, 'late_fees': '{:.2f}'.format(late_fee)})
 
-
 # The following main selection block will only run when you choose
 # "Run -> Module" in IDLE.  Use this section to run test code.  The
 # template code below tests the fees_report function.
@@ -67,15 +65,12 @@ def fees_report(infile, outfile):
 # under the data directory.
 
 if __name__ == '__main__':
-    
     try:
         from src.util import get_data_file_path
     except ImportError:
         from util import get_data_file_path
 
-    # BOOK_RETURNS_PATH = get_data_file_path('book_returns.csv')
     BOOK_RETURNS_PATH = get_data_file_path('book_returns_short.csv')
-
     OUTFILE = 'book_fees.csv'
 
     fees_report(BOOK_RETURNS_PATH, OUTFILE)
