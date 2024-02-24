@@ -27,7 +27,6 @@ def add_date_range(values, start_date):
     in the returned list."""
     date_objects = date_range(start_date, len(values))
     return list(zip(date_objects, values))
-
 def fees_report(infile, outfile):
     """Calculates late fees per patron id and writes a summary report to
     outfile."""
@@ -54,8 +53,10 @@ def fees_report(infile, outfile):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
-        for patron_id, late_fee in late_fees_dict.items():
+        for patron_id in late_fees_dict:
+            late_fee = late_fees_dict[patron_id]
             writer.writerow({'patron_id': patron_id, 'late_fees': '{:.2f}'.format(late_fee)})
+
 
 # The following main selection block will only run when you choose
 # "Run -> Module" in IDLE.  Use this section to run test code.  The
