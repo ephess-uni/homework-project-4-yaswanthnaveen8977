@@ -1,3 +1,4 @@
+.writerow({'patron_id': patron_id, 'late_fees': '{:.2f}'.format(late_fee)})
 # hp_4.py
 from datetime import datetime, timedelta
 from csv import DictReader, DictWriter
@@ -28,34 +29,39 @@ def add_date_range(values, start_date):
     date_objects = date_range(start_date, len(values))
     return list(zip(date_objects, values))
 def fees_report(infile, outfile):
-    """Calculates late fees per patron id and writes a summary report to
-    outfile."""
-    late_fees_dict = {}
+        """Calculates late fees per patron id and writes a summary report to
+        outfile."""
+        late_fees_dict = {}
 
-    with open(infile, 'r') as csvfile:
-        reader = csv.DictReader(csvfile)
+        with open(infile, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                patron_id = row['patron_id']
+                date_due = datetime.strptime(row['date_due'], '%m/%d/%Y')
+                date_returned = datetime.strptime(row['date_returned'], '%m/%d/%Y')
+
+                if date_returned > date_due:
+                    days_late = (date_returned - date_due).days
+                    late_fee = days_late * 0.25
+
+                    if patron_id not in late_fees_dict:
+                        late_fees_dict[patron_id] = 0.0
+
+                    late_fees_dict[patron_id] += late_fee
+
+        # Include patrons with zero late fees
         for row in reader:
             patron_id = row['patron_id']
-            date_due = datetime.strptime(row['date_due'], '%m/%d/%Y')
-            date_returned = datetime.strptime(row['date_returned'], '%m/%d/%Y')
+            if patron_id not in late_fees_dict:
+                late_fees_dict[patron_id] = 0.0
 
-            if date_returned > date_due:
-                days_late = (date_returned - date_due).days
-                late_fee = days_late * 0.25
+        with open(outfile, 'w', newline='') as csvfile:
+            fieldnames = ['patron_id', 'late_fees']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
 
-                if patron_id not in late_fees_dict:
-                    late_fees_dict[patron_id] = 0.0
-
-                late_fees_dict[patron_id] += late_fee
-
-    with open(outfile, 'w', newline='') as csvfile:
-        fieldnames = ['patron_id', 'late_fees']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-
-        for patron_id in late_fees_dict:
-            late_fee = late_fees_dict[patron_id]
-            writer.writerow({'patron_id': patron_id, 'late_fees': '{:.2f}'.format(late_fee)})
+            for patron_id, late_fee in late_fees_dict.items():
+                writer.writerow({'patron_id': patron_id, 'late_fees': '{:.2f}'.format(late_fee)})
 
 
 # The following main selection block will only run when you choose
