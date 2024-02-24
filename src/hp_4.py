@@ -8,27 +8,56 @@ from collections import defaultdict
 def reformat_dates(old_dates):
     """Accepts a list of date strings in format yyyy-mm-dd, re-formats each
     element to a format dd mmm yyyy--01 Jan 2001."""
-    pass
-
+    return [datetime.strptime(date, '%Y-%m-%d').strftime('%d %b %Y') for date in dates]
 
 def date_range(start, n):
     """For input date string `start`, with format 'yyyy-mm-dd', returns
     a list of of `n` datetime objects starting at `start` where each
     element in the list is one day after the previous."""
-    pass
+    if not isinstance(start, str):
+        raise TypeError("start should be a string in the format yyyy-mm-dd")
+    if not isinstance(n, int):
+        raise TypeError("n should be an integer")
+
+    start_date = datetime.strptime(start, '%Y-%m-%d')
+    return [start_date + timedelta(days=i) for i in range(n)]
 
 
 def add_date_range(values, start_date):
     """Adds a daily date range to the list `values` beginning with
     `start_date`.  The date, value pairs are returned as tuples
     in the returned list."""
-    pass
+    return list(zip(date_objects, values))
 
 
 def fees_report(infile, outfile):
     """Calculates late fees per patron id and writes a summary report to
     outfile."""
-    pass
+    late_fees_dict = {}
+
+    with open(infile, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            patron_id = row['patron_id']
+            date_due = datetime.strptime(row['date_due'], '%m/%d/%Y')
+            date_returned = datetime.strptime(row['date_returned'], '%m/%d/%Y')
+
+            if date_returned > date_due:
+                days_late = (date_returned - date_due).days
+                late_fee = days_late * 0.25
+
+                if patron_id not in late_fees_dict:
+                    late_fees_dict[patron_id] = 0.0
+
+                late_fees_dict[patron_id] += late_fee
+
+    with open(outfile, 'w', newline='') as csvfile:
+        fieldnames = ['patron_id', 'late_fees']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for patron_id, late_fee in late_fees_dict.items():
+            writer.writerow({'patron_id': patron_id, 'late_fees': '{:.2f}'.format(late_fee)})
 
 
 # The following main selection block will only run when you choose
