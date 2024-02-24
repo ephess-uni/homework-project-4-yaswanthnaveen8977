@@ -28,29 +28,32 @@ def add_date_range(values, start_date):
     in the returned list."""
     date_objects = date_range(start_date, len(values))
     return list(zip(date_objects, values))
+
 def fees_report(infile, outfile):
-        """Calculates late fees per patron id and writes a summary report to
-        outfile."""
-        late_fees_dict = {}
+    """Calculates late fees per patron id and writes a summary report to
+    outfile."""
+    late_fees_dict = {}
 
-        with open(infile, 'r') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                patron_id = row['patron_id']
-                date_due = datetime.strptime(row['date_due'], '%m/%d/%Y')
-                date_returned = datetime.strptime(row['date_returned'], '%m/%d/%Y')
+    with open(infile, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows = list(reader)  # Convert the reader to a list
 
-                if date_returned > date_due:
-                    days_late = (date_returned - date_due).days
-                    late_fee = days_late * 0.25
+        for row in rows:
+            patron_id = row['patron_id']
+            date_due = datetime.strptime(row['date_due'], '%m/%d/%Y')
+            date_returned = datetime.strptime(row['date_returned'], '%m/%d/%Y')
 
-                    if patron_id not in late_fees_dict:
-                        late_fees_dict[patron_id] = 0.0
+            if date_returned > date_due:
+                days_late = (date_returned - date_due).days
+                late_fee = days_late * 0.25
 
-                    late_fees_dict[patron_id] += late_fee
+                if patron_id not in late_fees_dict:
+                    late_fees_dict[patron_id] = 0.0
+
+                late_fees_dict[patron_id] += late_fee
 
         # Include patrons with zero late fees
-        for row in reader:
+        for row in rows:
             patron_id = row['patron_id']
             if patron_id not in late_fees_dict:
                 late_fees_dict[patron_id] = 0.0
