@@ -1,6 +1,5 @@
 from os import path
 
-
 def get_data_file_path(file_name: str) -> str:
     """
     get_data_file_path returns the absolute path to the a filename in the data directory
@@ -18,7 +17,7 @@ def get_data_file_path(file_name: str) -> str:
         The absolute path to the desired file if the file exists. Raises FileNotFound
         error otherwise.
     """
-    root_directory, _ = path.split(__file__)
+    root_directory, _ = path.split(__file__)  # Fix: change _file_ to __file__
     full_path = path.abspath(
         path.join(
             root_directory,
