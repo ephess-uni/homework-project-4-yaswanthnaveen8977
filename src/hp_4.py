@@ -82,7 +82,7 @@ def fees_report(infile, outfile):
 # Use the get_data_file_path function to get the full path of any file
 # under the data directory.
 
-if _name_ == '_main_':
+if __name__ == '__main__':
 
     try:
         from src.util import get_data_file_path
